@@ -1,0 +1,156 @@
+---
+title: "CANCER PREVALENCE ON ECONOMICALLY DEPRIVED COUNTIES IN THE UNITED STATES"
+author: "alex adenuga"
+date: "2023-01-19"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+**Abstract**
+
+In this report, we explored the United States Cancer Data that has 3047 counties across the continental states (excluding Alaska and Hawaii) to determine the best fit Multiple regression model that tells us if the economically deprived regions are home to people who suffer from incidence of cancer and if less clinical trials are performed in these poorer regions.   
+
+Results: The model built around the two questions stated above shows that approximately 40% of the variation was explained by the explanatory variables for death rate and the model is significant at 99%. Furthermore, even though the model for Study Per Cap is significant at 99%, it was noted that the variation explained by the explanatory variable is too small (1.7%) and the  Residual Standard Error is quite large (525.1). Hence, any prediction done with the model is considered unreliable. 
+
+Conclusion: It was concluded that the regions that are economically deprived suffer more cancer incidents and conclusion could not be reached on clinical trials due to insufficient information as seen in the model.
+
+
+**Introduction**
+
+Cancer is a blanket term for a family of diseases that affect mammals, where uncontrolled cellular growth occurs in the body. The growth that happens due to cancer can lead to death in some case; especially if it is not detected early or if proper treatment is not in place to stop its growth by killing its cells.
+
+**Objectives**
+
+The objectives of this report are to:
+
+(i) Determine if the economically deprived regions are home to people who suffer from incidence of cancer.
+
+(ii) Determine if less clinical trial are performed in the poorer regions.
+
+
+**Methodology**
+
+A multiple regression Model was used to explore this data. 
+
+Arbitrarily written as:
+$$
+y = \beta_{0} + \beta_1 x_{1} +.....\beta_n x_{n} + \epsilon
+$$
+
+**Analysis and Results**
+
+
+## Loading data
+```{r}
+cancer<-read.csv("cancer_reg.csv")
+
+```
+
+## Removing the variables that are not needed
+```{r}
+cancer1<-cancer[, -c(8, 9, 13, 16,17,18,19,20,21,22,23
+                     ,24,25,26,27,28,29, 30, 31, 32, 
+                     33, 34)]
+
+```
+
+
+## Checking for correlation with a plot
+```{r eval=TRUE}
+
+plot(cancer1)
+
+```
+
+
+## Confirming correlation check for some selected variables 
+
+```{r}
+
+
+cor(cancer1)[c(1, 2, 5, 6, 7, 9, 10, 12), c(1, 2, 5, 6, 7, 9,
+                                            10, 12)]
+
+```
+
+NOTE: It appears that popEst2015 is highly correlated with both avgAnncount and AvgDeathperyear.Additionally, MedianAgemale is highly correlated with medianAgefemale. Percentmarried is highly correlated with povertypercent. Finally, it appears that medIncome is highly correlated with povertyPercent.    
+
+
+
+## The Model for Objective(i)
+
+Note: In the model below; explanatory variables that are linearly correlated with another (as shown above) and pose adverse effect on explaining the response variable were removed from the model. In addition, an interaction was observed between PercentMarried & avgAnnCount; this was added to the model to improve the extent to which the response variable was explained by the explanatory variables.    
+
+```{r}
+
+
+mod1<-lm(TARGET_deathRate~.- MedianAge -  MedianAgeMale-
+           MedianAgeFemale - popEst2015 - avgDeathsPerYear 
+         - medIncome + PercentMarried:avgAnnCount, 
+         data = cancer1)
+
+summary(mod1)
+```
+
+
+**Discussions on objective (i): if the economically deprived regions are home to people who suffer from incidence of cancer?**
+ 
+## Related Model: 
+
+$$
+
+TargetDeathRate = 22.47 + 0.007AvgAnnCount + 
+0.237incidenceRate\\+ 1.935povertPercent + 
+0.070AvgHouseholdSize  + 0.366percentMarried 
+- \\0.0002avgAnncount : Percentmarried
+          
+$$
+
+The model for Target Death Rate above shows that The percentage of explained variation  is `r round(summary(mod1)$adj.r.squared * 100, 2)`% and the entire model is significant at 99% with RSE of 21.45.
+
+Additionally, the model shows that 10% increase in the percentage of those in poverty is associated with approximately 19 units increase in death rate from cancer when all other variables are held constant.
+
+This concludes that the economically deprived regions are home to people who suffer from incidence of cancer as the death rate from cancer almost double in outcome due to a unit increase in poverty percent in these regions. 
+
+## The Analysis and model for objective (ii) 
+
+```{r}
+cancer2<-cancer[, -c(3, 9, 13, 16,17,18,19,20,21,22,
+                     23,24,25,26,27,28,29, 30, 31, 32, 33, 34)]
+
+```
+
+
+
+## The model for Clinical Trials
+```{r}
+mod2<-lm(studyPerCap~.- MedianAge -  MedianAgeMale-
+           MedianAgeFemale - popEst2015 - avgDeathsPerYear 
+         - medIncome + PercentMarried:avgAnnCount, 
+         data = cancer2)
+summary(mod2)
+```
+
+**Discussions on objective (ii): if less clinical trial are performed in the poorer regions?**
+
+The model for StudyPerCap  above shows that The percentage of explained variation  is `r round(summary(mod2)$adj.r.squared * 100, 2)`% even though the entire model is significant at 99%, the  RSE is also very large at 525.1 and the extent to which the explanatory variable explained the variation in the response variable is too low. i.e, the Adjusted R squared is too low for any suggested prediction to be reliable.
+
+
+
+
+**Conclusion**
+
+The models show that those who live in the economically deprived regions predictably suffer more death rates due to cancer and the  model to explain clinical trials has a very low variation of the response variable explained; hence, it is not considered reliable to make any form of prediction.
+
+
+
+
+
